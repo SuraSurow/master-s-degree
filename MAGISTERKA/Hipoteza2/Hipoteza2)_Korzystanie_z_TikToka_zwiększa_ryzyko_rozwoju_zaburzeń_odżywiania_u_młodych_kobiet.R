@@ -9,8 +9,8 @@ library(lawstat)
 library(PMCMRplus)
 
 
-EAT26_testA <- read_excel("../eat26_testA/ankieta_kodowanieEAT26_testA.xlsx")
-EAT26_testB <- read_excel("../eat26_testB/ankieta_kodowanieEAT26_testB.xlsx")
+EAT26_testA <- read_excel("eat26_testA/ankieta_kodowanieEAT26_testA.xlsx")
+EAT26_testB <- read_excel("Hipoteza2/eat26_testB/ankieta_kodowanieEAT26_testB.xlsx")
 ankieta <- read_excel("ankieta.xlsx")
 
 

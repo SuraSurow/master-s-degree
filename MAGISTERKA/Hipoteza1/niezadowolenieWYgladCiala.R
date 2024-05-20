@@ -1,3 +1,4 @@
+
 library(readxl)  
 library(dplyr)   
 
@@ -51,75 +52,74 @@ nazwy_kolumn_do_zakodowania <- ankieta %>%
            case_when(
              `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?`== 'Tak, moja samoocena uległa pogorszeniu' ~ 1,
              `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?`== 'Nie myślałam nad tym' ~ 0,
-             `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?`== 'Nie, nie wpłynęło to na moją samoocenę' ~0
+             `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?`== 'Nie, nie wpłynęło to na moją samoocenę' ~ 0,
+             `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?`== 'Tak, moja samoocena polepszyła się' ~ 1
            ),
          `interptacja_pytania_4_i_5_kodowane` = ifelse(`4. Czy zdarza Ci się porównywać swój wygląd z wyglądem influencerów z TikToka?_kodowane` == 1, 
                                                        `5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?_kodowane`, 
                                                        "none")
          
   )
+  
 
 
-dane_po_kodowaniu_hip1_grupy<- nazwy_kolumn_do_zakodowania %>%
+# Filtracja na podstawie pytania 4
+osoby_porownujace_wyglad <- nazwy_kolumn_do_zakodowania %>%
+  filter(`4. Czy zdarza Ci się porównywać swój wygląd z wyglądem influencerów z TikToka?_kodowane` == 1)
+
+# Dalsza analiza na podstawie pytania 5
+dane_po_kodowaniu_hip1_grupy <- osoby_porownujace_wyglad %>%
   select(ends_with("_kodowane"))
 
-
 grupa_Ogladaczy <- filter(
-  dane_po_kodowaniu_hip1_grupy ,
+  dane_po_kodowaniu_hip1_grupy,
   dane_po_kodowaniu_hip1_grupy$`3. Jak często przeglądasz treści na TikToku dotyczące odżywiania i wyglądu ?._kodowane` == 1
 )
-
 
 grupa_NieOgladaczy <- filter(
   dane_po_kodowaniu_hip1_grupy,
   dane_po_kodowaniu_hip1_grupy$`3. Jak często przeglądasz treści na TikToku dotyczące odżywiania i wyglądu ?._kodowane` == 0
 )
 
-t_samoocena <- t.test(
-  grupa_Ogladaczy$`18. Czy zadowala Cię wygląd własnego ciała ?_kodowane`,
-  grupa_NieOgladaczy$`18. Czy zadowala Cię wygląd własnego ciała ?_kodowane`,
-  alternative = "two.sided"
-)
 
-print(t_samoocena)
-library(ggplot2)
-
-# Obliczenie liczby osób z grupy, które mają złą samoocenę
-liczba_osob_zla_samoocena <- sum(grupa_Ogladaczy$`18. Czy zadowala Cię wygląd własnego ciała ?_kodowane` == 0)
-procent_zla_samoocena <- liczba_osob_zla_samoocena / nrow(grupa_Ogladaczy) * 100
-liczba_osob_zla_samoocena_nieogl <- sum(grupa_NieOgladaczy$`18. Czy zadowala Cię wygląd własnego ciała ?_kodowane` == 0)
-
-
-
-# Tworzenie ramki danych do wykresu
-dane_wykres <- data.frame(
-  Grupa = c("Grupa Oglądających", "Grupa Nie Oglądających"),
-  Liczba_Osob = c(nrow(grupa_Ogladaczy), nrow(grupa_NieOgladaczy)),
-  Zla_Samoocena = c(liczba_osob_zla_samoocena, liczba_osob_zla_samoocena_nieogl),
-  Procent_Zla_Samoocena = c(liczba_osob_zla_samoocena / nrow(grupa_Ogladaczy) * 100, liczba_osob_zla_samoocena_nieogl / nrow(grupa_NieOgladaczy) * 100)
-)
-
-
-wykres_slupek <- ggplot(dane_wykres, aes(x = Grupa)) +
-  geom_bar(aes(y = Liczba_Osob, fill = "Wszystkie Osoby"), stat = "identity", width = 0.5) +
-  geom_bar(aes(y = Zla_Samoocena, fill = "Osoby niezadowolone ze swojego krztałtu ciała"), stat = "identity", width = 0.5) +
-  scale_fill_manual(values = c("Wszystkie Osoby" = "lightblue", "Osoby niezadowolone ze swojego krztałtu ciała" = "orange")) +
-  geom_text(aes(label = Liczba_Osob, y = Liczba_Osob), vjust = -0.5, size = 3, color = "black") +
-  geom_text(aes(label = Zla_Samoocena, y = Zla_Samoocena), vjust = -0.5, size = 3, color = "black") +
-  geom_text(aes(label = paste(round(Procent_Zla_Samoocena, 2), "%"), y = Zla_Samoocena - 10), vjust = -0.5, size = 3, color = "black") +
-  geom_text(x = 1.5, y = max(dane_wykres$Liczba_Osob), label = paste("p-value =", format(t_samoocena$p.value, digits = 4)), vjust = 1.5, size = 3, color = "black") +
-  labs(title = "Liczba osób niezadowolona z krztałtu swojego ciała w porównaniu z ogólną liczbą osób w grupach",
-       x = "Grupa",
-       y = "Liczba osób",
-       fill = "Legenda") +
-  theme_classic() +
-  theme(legend.position = "bottom",
-        plot.title = element_text(hjust = 0.5))  # Poprawiona linijka z legendą
-
-
-
-print(wykres_slupek)
-
-
-
-
+  t_samoocena <- t.test(
+    grupa_Ogladaczy$`5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?_kodowane`,
+    grupa_NieOgladaczy$`5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?_kodowane`,
+    alternative = "two.sided"
+  )
+  
+  print(t_samoocena)
+  
+  # Obliczenie liczby osób z grupy, które mają złą samoocenę
+  liczba_osob_zla_samoocena <- sum(grupa_Ogladaczy$`5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?_kodowane` == 1)
+  procent_zla_samoocena <- liczba_osob_zla_samoocena / nrow(grupa_Ogladaczy) * 100
+  liczba_osob_zla_samoocena_nieogl <- sum(grupa_NieOgladaczy$`5. Jeżeli tak to czy wpłynęło to w jakiś sposób na twoją samoocenę ?_kodowane` == 1)
+  
+  # Tworzenie ramki danych do wykresu
+  dane_wykres <- data.frame(
+    Grupa = c("Grupa Oglądających", "Grupa Nie Oglądających"),
+    Liczba_Osob = c(nrow(grupa_Ogladaczy), nrow(grupa_NieOgladaczy)),
+    Zla_Samoocena = c(liczba_osob_zla_samoocena, liczba_osob_zla_samoocena_nieogl),
+    Procent_Zla_Samoocena = c(liczba_osob_zla_samoocena / nrow(grupa_Ogladaczy) * 100, liczba_osob_zla_samoocena_nieogl / nrow(grupa_NieOgladaczy) * 100)
+  )
+  
+  wykres_slupek <- ggplot(dane_wykres, aes(x = Grupa)) +
+    geom_bar(aes(y = Liczba_Osob, fill = "Wszystkie Osoby"), stat = "identity", width = 0.5) +
+    geom_bar(aes(y = Zla_Samoocena, fill = "Osoby które odczuły wpływ porównywania się na samoocene"), stat = "identity", width = 0.5) +
+    scale_fill_manual(values = c("Wszystkie Osoby" = "lightblue", "Osoby które odczuły wpływ porównywania się na samoocene" = "orange")) +
+    geom_text(aes(label = Liczba_Osob, y = Liczba_Osob), vjust = -0.5, size = 3, color = "black") +
+    geom_text(aes(label = Zla_Samoocena, y = Zla_Samoocena), vjust = -0.5, size = 3, color = "black") +
+    geom_text(aes(label = paste(round(Procent_Zla_Samoocena, 2), "%"), y = Zla_Samoocena - 10), vjust = -0.5, size = 3, color = "black") +
+    geom_text(x = 1.5, y = max(dane_wykres$Liczba_Osob), label = paste("p-value =", format(t_samoocena$p.value, digits = 4)), vjust = 1.5, size = 3, color = "black") +
+    labs(title = "Odsetek osób, które odczuły wpływ porównywania swojego wyglądu do influencerów na swoją samoocenę,\n w zestawieniu z ogólną liczbą osób w badanych grupach.",
+         x = "Grupa",
+         y = "Liczba osób",
+         fill = "Legenda") +
+    theme_classic() +
+    theme(legend.position = "bottom",
+          plot.title = element_text(hjust = 0.5))  # Poprawiona linijka z legendą
+  
+  print(wykres_slupek)
+  
+  print(grupa_NieOgladaczy,n=40)
+  
