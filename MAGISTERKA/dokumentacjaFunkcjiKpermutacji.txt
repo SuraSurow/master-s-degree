@@ -1,0 +1,40 @@
+#' Funkcja do obliczenia testu k-sample permutation
+#' 
+#' Funkcja przeprowadza test k-sample permutation, który pozwala na porównanie średnich między różnymi grupami, bez konieczności spełniania założeń dotyczących identycznych kształtów i skal dystrybucji.
+#' 
+#' x Wektor danych numerycznych, zawierający wartości zmiennej zależnej.
+#' g Wektor określający przynależność do grup.
+#' @return Wartość p-testu k-sample permutation, określająca istotność statystyczną różnic między grupami.
+#' 
+#' @examples
+#' k_sample_permutation_test(x = dane_kodowane$`17. Czy przez treści z TikToka kiedykolwiek ograniczyłaś ilość przyjmowanych kalorii co wpłynęło na wystąpienie u Ciebie niedostatecznej masy ciała?_kodowane`,
+#'                           g = dane_kodowane$`2. Ile czasu dziennie poświęcasz na przeglądanie TikToka?_kodowane`)
+#' 
+#' @export
+k_sample_permutation_test <- function(x, g) {
+  # Liczba grup
+  k <- length(unique(g))
+  
+  # Liczba obserwacji
+  n <- length(x)
+  
+  # Obliczenie statystyki testowej
+  group_means <- tapply(x, g, mean)
+  grand_mean <- mean(x)
+  obs_stat <- sum((group_means - grand_mean)^2)
+  
+  # Przeprowadzenie permutacji
+  num_perm <- 1000
+  perm_stats <- numeric(num_perm)
+  for (i in 1:num_perm) {
+    perm_group <- sample(g)
+    perm_group_means <- tapply(x, perm_group, mean)
+    perm_stat <- sum((perm_group_means - grand_mean)^2)
+    perm_stats[i] <- perm_stat
+  }
+  
+  # Obliczenie p-value
+  p_value <- sum(perm_stats >= obs_stat) / num_perm
+  
+  return(p_value)
+}

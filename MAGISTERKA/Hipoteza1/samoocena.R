@@ -8,7 +8,7 @@ library(writexl)
 
 dir.create("Hipoteza1/Kodowanie", showWarnings = FALSE)
 
-ankieta <- read_excel("ankieta.xlsx")
+ankieta <- read_excel("../ankieta.xlsx")
 
 nazwy_kolumn_do_zakodowania <- ankieta %>%
   mutate(`3. Jak często przeglądasz treści na TikToku dotyczące odżywiania i wyglądu ?._kodowane`=
